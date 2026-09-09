@@ -23,7 +23,26 @@ SKILLS = [
     "Data Science",
     "OpenCV",
     "Git",
-    "Docker"
+    "GitHub",
+    "Docker",
+    "Agile",
+    "Agile Project Management",
+    "Scrum",
+    "JIRA",
+    "Jira",
+    "Asana",
+    "Data Analysis",
+    "Budget Forecasting",
+    "Team Leadership",
+    "Project Coordination",
+    "Project Management",
+    "Communication",
+    "Problem-solving",
+    "Time Management",
+    "Client Relations",
+    "Cross-functional Collaboration",
+    "Strategic Planning",
+    "Stakeholder Management"
 ]
 
 
@@ -72,8 +91,10 @@ def extract_name(text):
 def extract_skills(text):
     found = []
 
+    text_lower = text.lower()
+
     for skill in SKILLS:
-        if skill.lower() in text.lower():
+        if skill.lower() in text_lower:
             found.append(skill)
 
     return sorted(set(found))
@@ -81,16 +102,16 @@ def extract_skills(text):
 
 def extract_education(text):
     patterns = [
-        r"B\.?Tech",
-        r"B\.?E",
-        r"M\.?Tech",
-        r"M\.?E",
-        r"B\.?Sc",
-        r"M\.?Sc",
+        r"B\.?\s*Tech",
+        r"B\.?\s*E",
+        r"M\.?\s*Tech",
+        r"M\.?\s*E",
+        r"B\.?\s*Sc",
+        r"M\.?\s*Sc",
         r"BCA",
         r"MCA",
         r"MBA",
-        r"Ph\.?D",
+        r"Ph\.?\s*D",
         r"Bachelor",
         r"Master",
         r"Diploma"
@@ -100,7 +121,9 @@ def extract_education(text):
 
     for pattern in patterns:
         if re.search(pattern, text, re.IGNORECASE):
-            found.append(pattern.replace(r"\.?", ""))
+            found.append(
+                re.sub(r"\\\.?|\s+", "", pattern)
+            )
 
     if found:
         return ", ".join(found)
