@@ -2,86 +2,45 @@ import re
 
 
 SKILLS = [
-    "Python",
-    "Java",
-    "C++",
-    "JavaScript",
-    "HTML",
-    "CSS",
-    "SQL",
-    "MySQL",
-    "MongoDB",
-    "Django",
-    "Flask",
-    "React",
-    "Pandas",
-    "NumPy",
-    "TensorFlow",
-    "PyTorch",
-    "Machine Learning",
-    "Deep Learning",
-    "Data Science",
-    "OpenCV",
-    "Git",
-    "GitHub",
-    "Docker",
-    "Agile",
-    "Agile Project Management",
-    "Scrum",
-    "JIRA",
-    "Jira",
-    "Asana",
-    "Data Analysis",
-    "Budget Forecasting",
-    "Team Leadership",
-    "Project Coordination",
-    "Project Management",
-    "Communication",
-    "Problem-solving",
-    "Time Management",
-    "Client Relations",
-    "Cross-functional Collaboration",
-    "Strategic Planning",
-    "Stakeholder Management"
+    "Python", "Java", "C++", "JavaScript", "HTML", "CSS",
+    "SQL", "MySQL", "MongoDB", "Django", "Flask", "React",
+    "Pandas", "NumPy", "TensorFlow", "PyTorch",
+    "Machine Learning", "Deep Learning", "Data Science",
+    "OpenCV", "Git", "GitHub", "Docker",
+    "Agile", "Agile Project Management", "Scrum",
+    "JIRA", "Asana", "Data Analysis", "Budget Forecasting",
+    "Team Leadership", "Project Coordination",
+    "Project Management", "Communication",
+    "Problem-solving", "Time Management",
+    "Client Relations", "Cross-functional Collaboration",
+    "Strategic Planning", "Stakeholder Management"
 ]
 
 
 def extract_email(text):
     match = re.search(
-        r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b",
+        r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}",
         text
     )
-
-    if match:
-        return match.group(0)
-
-    return "Not detected"
+    return match.group(0) if match else "Not detected"
 
 
 def extract_phone(text):
     match = re.search(
-        r"(\+?\d[\d\s().-]{8,}\d)",
+        r"\+?\d[\d\s().-]{8,}\d",
         text
     )
-
-    if match:
-        return match.group(0).strip()
-
-    return "Not detected"
+    return match.group(0).strip() if match else "Not detected"
 
 
 def extract_name(text):
-    lines = [
-        line.strip()
-        for line in text.splitlines()
-        if line.strip()
-    ]
+    lines = [x.strip() for x in text.splitlines() if x.strip()]
 
     for line in lines[:10]:
         if (
             2 <= len(line.split()) <= 4
             and "@" not in line
-            and not any(char.isdigit() for char in line)
+            and not any(c.isdigit() for c in line)
         ):
             return line
 
@@ -90,45 +49,44 @@ def extract_name(text):
 
 def extract_skills(text):
     found = []
-
     text_lower = text.lower()
 
+    # Normal skill matching
     for skill in SKILLS:
         if skill.lower() in text_lower:
             found.append(skill)
+
+    # Extra extraction from the Skills section
+    section_match = re.search(
+        r"(key skills|skills|hard skills)(.*?)(?=soft skills|education|work experience|experience|$)",
+        text,
+        re.IGNORECASE | re.DOTALL
+    )
+
+    if section_match:
+        section = section_match.group(2)
+
+        for skill in SKILLS:
+            if skill.lower() in section.lower():
+                found.append(skill)
 
     return sorted(set(found))
 
 
 def extract_education(text):
-    patterns = [
-        r"B\.?\s*Tech",
-        r"B\.?\s*E",
-        r"M\.?\s*Tech",
-        r"M\.?\s*E",
-        r"B\.?\s*Sc",
-        r"M\.?\s*Sc",
-        r"BCA",
-        r"MCA",
-        r"MBA",
-        r"Ph\.?\s*D",
-        r"Bachelor",
-        r"Master",
-        r"Diploma"
+    education_words = [
+        "B.Tech", "B.E", "M.Tech", "M.E",
+        "B.Sc", "M.Sc", "BCA", "MCA", "MBA",
+        "Ph.D", "Bachelor", "Master", "Diploma"
     ]
 
     found = []
 
-    for pattern in patterns:
-        if re.search(pattern, text, re.IGNORECASE):
-            found.append(
-                re.sub(r"\\\.?|\s+", "", pattern)
-            )
+    for word in education_words:
+        if word.lower() in text.lower():
+            found.append(word)
 
-    if found:
-        return ", ".join(found)
-
-    return "Not detected"
+    return ", ".join(found) if found else "Not detected"
 
 
 def parse_resume(text):
